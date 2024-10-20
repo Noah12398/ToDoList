@@ -7,7 +7,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 
 class Second : AppCompatActivity() {
     private lateinit var todoListView: ListView
@@ -19,7 +20,7 @@ class Second : AppCompatActivity() {
     private lateinit var back: Button
 
     // Firebase Firestore reference
-    private val tasksCollection = FirebaseFirestore.getInstance().collection("tasks")
+    private val tasksCollection = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,10 +40,11 @@ class Second : AppCompatActivity() {
 
         // Get the username from MainActivity
         val username = intent.getStringExtra("Extra")
+        val password = intent.getStringExtra("Extrapass")
 
         // Retrieve tasks for the specific user
-        if (username != null) {
-            loadTasksForUser(username)
+        if (username != null && password !=null) {
+            loadTasksForUser(username,password)
         }
 
         // Navigate back to MainActivity
@@ -58,24 +60,25 @@ class Second : AppCompatActivity() {
                 taskInput.text.clear()  // Clear the input field
 
                 // Save the task to Firestore
-                saveTask(username ?: "Unknown", newTask)
+                saveTask(username ?: "Unknown", newTask,password?:"Unknown")
             }
         }
     }
 
     // Method to load tasks for the specific user
-    private fun loadTasksForUser(username: String) {
-        tasksCollection.whereEqualTo("Username", username)
+    private fun loadTasksForUser(username: String, password: String) {
+        tasksCollection.collection("tasks").whereEqualTo("Username", username).whereEqualTo("Password",password)
             .get()
             .addOnSuccessListener { result ->
                 tasks.clear()  // Clear the task list before loading new data
                 taskIds.clear() // Clear task IDs
+
                 for (document in result) {
                     val task = document.getString("Task")
-                    if (task != null) {
-                        tasks.add(task)  // Add only tasks of the specified user
+                    task?.let {
+                        tasks.add(it)  // Add task if it's not null
                         taskIds.add(document.id)  // Store the document ID for deletion
-                        Log.d("Task", "Task loaded: $task")
+                        Log.d("Task", "Task loaded: $it")
                     }
                 }
                 adapter.notifyDataSetChanged()  // Refresh the ListView
@@ -86,13 +89,14 @@ class Second : AppCompatActivity() {
     }
 
     // Method to save task to Firestore
-    private fun saveTask(username: String, newTask: String) {
+    private fun saveTask(username: String, newTask: String, password: String) {
         val data = hashMapOf(
             "Username" to username,
-            "Task" to newTask
+            "Task" to newTask,
+            "Password" to password
         )
 
-        tasksCollection.add(data)
+        tasksCollection.collection("tasks").add(data)
             .addOnSuccessListener {
                 Log.d("Firestore", "Task successfully added")
                 tasks.add(newTask)

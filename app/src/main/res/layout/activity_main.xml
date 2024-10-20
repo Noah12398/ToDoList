@@ -10,8 +10,7 @@
         android:id="@+id/button"
         android:layout_width="123dp"
         android:layout_height="41dp"
-        android:background="@android:drawable/button_onoff_indicator_off"
-        android:backgroundTint="#E4EAB2"
+        android:background="@drawable/rounded_button"
         android:text="Login"
         android:textColor="#0FE3A7"
         android:textColorHighlight="#A54040"
@@ -22,6 +21,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.627" />
+
 
     <EditText
         android:id="@+id/editTextText"
@@ -56,6 +56,7 @@
         android:layout_height="82dp"
         android:text="Login"
         android:textAlignment="center"
+        android:textColor="#2FA532"
         android:textSize="34sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
